@@ -12,6 +12,6 @@ const imageSchema = new Schema({
     data: {type:Buffer,required:true}
   })
 
-const Image:Model<imageI> = model('Image',imageSchema)
+const Image:Model<imageI> = model('image',imageSchema)
 
 export {Image,imageI}
