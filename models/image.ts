@@ -1,10 +1,17 @@
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
+import {model,Model, Schema} from 'mongoose'
+
+interface imageI {
+  filename:string,
+  contentType:string,
+  data:Buffer
+}
 
 const imageSchema = new Schema({
-    filename:String,
-    contentType:String,
-    data: Buffer
+    filename:{type:String,required:true},
+    contentType:{type:String,required:true},
+    data: {type:Buffer,required:true}
   })
-  
-  module.exports = new mongoose.model('Image',imageSchema)
+
+const Image:Model<imageI> = model('Image',imageSchema)
+
+export {Image,imageI}

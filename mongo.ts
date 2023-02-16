@@ -1,43 +1,40 @@
 export {} // required to prevent typescript error: Cannot redeclare block-scoped variable
 
-const dotenv = require('dotenv')
+import dotenv from 'dotenv'
 dotenv.config()
-const fs = require('fs')
-const path = require('path')
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
+import {readFileSync,createWriteStream} from 'fs'
+import path from 'path'
+import mongoose from 'mongoose'
 mongoose.set('strictQuery', false)
+import {connect,connection} from 'mongoose'
+import {Image,imageI} from './models/image'
 
-const Image = require('./models/image')
-
-// connect to mongoDB
-mongoose.connect(process.env.mongo).catch((err:Error) => {
+connect(process.env.mongo??'').catch((err:Error) => {
     throw err
   })
-mongoose.connection.on('error', (err:Error) => {
+connection.on('error', (err:Error) => {
     if (err) throw err
   })
 
-// upload image
-const uploadSample = () => {
+const uploadSampleImage = () => {
   const image = new Image({
     filename:'sample.jpg',
     contentType:'image/jpg',
-    data: fs.readFileSync(path.join(__dirname,'sample.jpg'))
+    data: readFileSync(path.join(__dirname,'sample.jpg'))
   })
-  
-image.save((err:Error)=> {
+image.save((err:Error|null)=> {
   if (err) return console.log(err)
   console.log('image saved')
 })
 }
+// uploadSampleImage()
   
-const downloadSample = () => {
-  Image.findOne((err:Error,image:typeof Image)=>{
+const downloadSampleImage = () => {
+  Image.findOne((err:Error,image:imageI)=>{
     if (err) return console.log(err)
-    const writeStream = fs.createWriteStream('test.jpg')
+    const writeStream = createWriteStream('test.jpg')
     writeStream.on('end',()=>writeStream.end())
     writeStream.write(image.data)
   })
 }
-downloadSample()
+downloadSampleImage()
