@@ -4,6 +4,7 @@ dotenv.config()
 import mongoose from 'mongoose'
 mongoose.set('strictQuery',false)
 import { Article,articleI } from './models/article'
+import cors from 'cors'
 
 mongoose.connect(process.env.mongo??'').catch((err:Error) => {
     throw err
@@ -13,6 +14,7 @@ mongoose.connection.on('error', (err:Error) => {
   })
 
 const app = express()
+app.use(cors())
 
 app.get('/articles',(req,res,next)=>{
     Article.find({},{content:0},(err:Error|null,articles:articleI[])=> {
