@@ -21,4 +21,11 @@ app.get('/articles',(req,res,next)=>{
       })
 })
 
+app.get('/articles/:articleId',(req,res,next)=>{
+    Article.findById(req.params.articleId,{textBrief:0},(err:Error|null,article:articleI)=> {
+        if (err) return res.json(err)
+        return res.json(article)
+      })
+})
+
 app.listen(process.env.port,()=>console.log(`listening at port ${process.env.port}...`))
