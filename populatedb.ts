@@ -1,5 +1,3 @@
-export {} // required to prevent typescript error: Cannot redeclare block-scoped variable
-
 import dotenv from 'dotenv'
 dotenv.config()
 import {readFileSync,createWriteStream} from 'fs'
@@ -8,7 +6,7 @@ import mongoose from 'mongoose'
 mongoose.set('strictQuery', false)
 import {connect,connection} from 'mongoose'
 import {Image,imageI} from './models/image'
-import {Article,articleI} from './models/article'
+import {Article} from './models/article'
 
 connect(process.env.mongo??'').catch((err:Error) => {
     throw err
