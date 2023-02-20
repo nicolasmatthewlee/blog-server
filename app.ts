@@ -1,10 +1,13 @@
-import express from 'express'
+import express, { NextFunction ,Request,Response} from 'express'
+
 import dotenv from 'dotenv'
 dotenv.config()
 import mongoose from 'mongoose'
 mongoose.set('strictQuery',false)
 import { Article,articleI } from './models/article'
+import {User,userI} from './models/user'
 import cors from 'cors'
+import {body,validationResult} from 'express-validator'
 
 mongoose.connect(process.env.mongo??'').catch((err:Error) => {
     throw err
@@ -14,6 +17,8 @@ mongoose.connection.on('error', (err:Error) => {
   })
 
 const app = express()
+app.use(express.json())
+
 app.use(cors())
 
 app.get('/articles',(req,res,next)=>{
@@ -28,6 +33,36 @@ app.get('/articles/:articleId',(req,res,next)=>{
         if (err) return res.json(err)
         return res.json(article)
       })
+})
+
+app.post('/signup',[
+  body('username').trim().escape().isLength({min:1}).withMessage('Username must be specified').isLength({max:50}).withMessage('username must not exceed 50 characters').custom((value) => {
+    return User.findOne({ username: value }).then((user) => {
+      if (user) return Promise.reject('Username already in use')
+    })
+  }),
+  body('password').trim().escape().isLength({min:1}).withMessage('Password must be specified').isLength({max:50}).withMessage('password must not exceed 50 characters'),
+  (req:Request,res:Response,next:NextFunction)=>{
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) return res.json(errors)
+
+    const user = new User({
+      username:req.body.username,
+      password:req.body.password
+    })
+
+    user.save((err,result)=>{
+      if (err) return res.json(err)
+      return res.json({saved:true})
+  })
+}])
+
+app.use((err:Error, req:Request, res:Response, next:NextFunction) => {
+  if (err) {
+    console.error(err.stack)
+    res.status(500).json({errors:[{message:'An unknown error occurred'}]})
+  }
+  
 })
 
 app.listen(process.env.port,()=>console.log(`listening at port ${process.env.port}...`))
