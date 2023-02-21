@@ -2,6 +2,7 @@ const passport = require("passport");
 const LocalStrategy = require("passport-local");
 import mongoose from "mongoose";
 import { User, userI } from "./models/user";
+const bcrypt = require("bcryptjs");
 
 passport.use(
   new LocalStrategy((username: string, password: string, cb: Function) => {
@@ -9,9 +10,12 @@ passport.use(
       if (err) return cb(err);
       if (!user)
         return cb(null, false, { message: "Incorrect username or password" });
-      if (user.password !== password)
-        return cb(null, false, { message: "Incorrect username or password" });
-      else return cb(null, user);
+      bcrypt.compare(password, user.password, (err: any, res: Boolean) => {
+        if (err) return cb(err);
+        if (!res)
+          return cb(null, false, { message: "Incorrect username or password" });
+        else return cb(null, user);
+      });
     });
   })
 );

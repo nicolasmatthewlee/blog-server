@@ -12,6 +12,7 @@ const session = require("express-session");
 import MongoStore from "connect-mongo";
 const passport = require("passport");
 require("./passport.ts");
+const bcrypt = require("bcryptjs");
 
 declare module "express" {
   export interface Request {
@@ -80,14 +81,18 @@ app.post("/signup", [
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.json(errors);
 
-    const user = new User({
-      username: req.body.username,
-      password: req.body.password,
-    });
+    bcrypt.hash(req.body.password, 10, (err: any, hashedPassword: string) => {
+      if (err) return next(err);
 
-    user.save((err, result) => {
-      if (err) return res.json(err);
-      return res.json({ saved: true });
+      const user = new User({
+        username: req.body.username,
+        password: hashedPassword,
+      });
+
+      user.save((err, result) => {
+        if (err) return res.json(err);
+        return res.json({ saved: true });
+      });
     });
   },
 ]);
