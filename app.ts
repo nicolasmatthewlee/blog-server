@@ -8,6 +8,17 @@ import { Article,articleI } from './models/article'
 import {User,userI} from './models/user'
 import cors from 'cors'
 import {body,validationResult} from 'express-validator'
+const session = require('express-session')
+import MongoStore from 'connect-mongo'
+const passport = require('passport')
+require('./passport.ts')
+
+declare module 'express' {
+  export interface Request {
+        user?: any;
+        logIn?:Function;
+    }
+}
 
 mongoose.connect(process.env.mongo??'').catch((err:Error) => {
     throw err
@@ -20,6 +31,15 @@ const app = express()
 app.use(express.json())
 
 app.use(cors())
+
+app.use(session({
+  secret:process.env.secret,
+  resave:false,
+  saveUninitialized:true,
+  store:MongoStore.create({mongoUrl:process.env.mongo})
+}))
+
+app.use(passport.authenticate('session'))
 
 app.get('/articles',(req,res,next)=>{
     Article.find({},{content:0},(err:Error|null,articles:articleI[])=> {
@@ -56,6 +76,34 @@ app.post('/signup',[
       return res.json({saved:true})
   })
 }])
+
+app.post('/signin',[
+  body('username').trim().escape().isLength({min:1}).withMessage('Username must be specified').isLength({max:50}).withMessage('username must not exceed 50 characters'),
+  body('password').trim().escape().isLength({min:1}).withMessage('Password must be specified').isLength({max:50}).withMessage('password must not exceed 50 characters'),
+(req:Request,res:Response,next:NextFunction) => {
+  const errors = validationResult(req)
+    if (!errors.isEmpty()) return res.json(errors)
+    next()
+}
+,
+(req:Request,res:Response,next:NextFunction)=> passport.authenticate('local',(err:string,user:userI)=>{
+    if (err) return next(err)
+    if (!user) return res.json({errors:[{message:'Username or password is incorrect'}]})
+  
+    if (req.logIn) req.logIn(user,(err:string)=>{
+      if (err) return next(err)
+      return res.json({success:true})
+    })
+
+  })(req,res,next)
+,
+(req:Request,res:Response,next:NextFunction)=>{
+  console.log(req.user)
+  next()
+}
+])
+
+
 
 app.use((err:Error, req:Request, res:Response, next:NextFunction) => {
   if (err) {
