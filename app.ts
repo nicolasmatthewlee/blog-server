@@ -16,7 +16,8 @@ require("./passport.ts");
 declare module "express" {
   export interface Request {
     user?: any;
-    logIn?: Function;
+    login?: Function;
+    logout?: Function;
     sessionID?: any;
   }
 }
@@ -102,11 +103,6 @@ app.use(
 
 app.use(passport.authenticate("session"));
 
-app.use((req: Request, res: Response, next: NextFunction) => {
-  console.log(req.sessionID);
-  next();
-});
-
 app.post("/signin", [
   body("username")
     .trim()
@@ -135,8 +131,8 @@ app.post("/signin", [
           errors: [{ message: "Username or password is incorrect" }],
         });
 
-      if (req.logIn)
-        req.logIn(user, (err: string) => {
+      if (req.login)
+        req.login(user, (err: string) => {
           if (err) return next(err);
           return res.json({ success: true });
         });
@@ -144,10 +140,18 @@ app.post("/signin", [
 ]);
 
 app.get("/user", (req: Request, res: Response, next: NextFunction) => {
-  console.log(req.user);
   return req.user
-    ? res.json(req.user)
+    ? res.json({ _id: req.user._id, username: req.user.username })
     : res.json({ errors: [{ message: "Unauthorized" }] });
+});
+
+app.post("/signout", (req: Request, res: Response, next: NextFunction) => {
+  if (req.logout)
+    return req.logout((err: any) => {
+      if (err) return next(err);
+      res.json({ success: true });
+    });
+  next();
 });
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
