@@ -51,7 +51,6 @@ app.get(
   (req: Request, res: Response, next: NextFunction) => {
     Article.findById(
       req.params.articleId,
-      { textBrief: 0 },
       (err: Error | null, article: articleI) => {
         if (err) return res.json(err);
         return res.json(article);
