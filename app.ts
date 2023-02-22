@@ -35,7 +35,7 @@ app.use(express.json());
 
 app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 
-app.get("/articles", (req, res, next) => {
+app.get("/articles", (req: Request, res: Response, next: NextFunction) => {
   Article.find(
     {},
     { content: 0 },
@@ -46,16 +46,19 @@ app.get("/articles", (req, res, next) => {
   );
 });
 
-app.get("/articles/:articleId", (req, res, next) => {
-  Article.findById(
-    req.params.articleId,
-    { textBrief: 0 },
-    (err: Error | null, article: articleI) => {
-      if (err) return res.json(err);
-      return res.json(article);
-    }
-  );
-});
+app.get(
+  "/articles/:articleId",
+  (req: Request, res: Response, next: NextFunction) => {
+    Article.findById(
+      req.params.articleId,
+      { textBrief: 0 },
+      (err: Error | null, article: articleI) => {
+        if (err) return res.json(err);
+        return res.json(article);
+      }
+    );
+  }
+);
 
 app.post("/signup", [
   body("username")
@@ -158,6 +161,16 @@ app.post("/signout", (req: Request, res: Response, next: NextFunction) => {
     });
   next();
 });
+
+app.delete(
+  "/users/:userId",
+  (req: Request, res: Response, next: NextFunction) => {
+    User.findByIdAndDelete(req.params.userId, (err: any, result: any) => {
+      if (err) return next(err);
+      else return res.json({ success: true });
+    });
+  }
+);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   if (err) {
