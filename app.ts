@@ -90,6 +90,7 @@ app.post("/signup", [
       const user = new User({
         username: req.body.username,
         password: hashedPassword,
+        saved: [],
       });
 
       user.save((err, result) => {
@@ -149,7 +150,11 @@ app.post("/signin", [
 
 app.get("/user", (req: Request, res: Response, next: NextFunction) => {
   return req.user
-    ? res.json({ _id: req.user._id, username: req.user.username })
+    ? res.json({
+        _id: req.user._id,
+        username: req.user.username,
+        saved: req.user.saved,
+      })
     : res.json({ errors: [{ message: "Unauthorized" }] });
 });
 
@@ -169,6 +174,31 @@ app.delete(
       if (err) return next(err);
       else return res.json({ success: true });
     });
+  }
+);
+
+app.post(
+  "/users/:userId/saved",
+  (req: Request, res: Response, next: NextFunction) => {
+    if (Number(req.body.toStatus) === 1) {
+      User.findByIdAndUpdate(
+        req.params.userId,
+        { $addToSet: { saved: req.body.articleId } },
+        (err: any, result: any) => {
+          if (err) return next(err);
+          else return res.json({ result: 1 });
+        }
+      );
+    } else {
+      User.findByIdAndUpdate(
+        req.params.userId,
+        { $pull: { saved: req.body.articleId } },
+        (err: any, result: any) => {
+          if (err) return next(err);
+          else return res.json({ result: 0 });
+        }
+      );
+    }
   }
 );
 
