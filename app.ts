@@ -122,6 +122,8 @@ app.get(
       req.params.articleId,
       (err: Error | null, article: articleI) => {
         if (err) return res.json(err);
+        if (!article)
+          return res.json({ errors: [{ message: "No article found" }] });
         return res.json(article);
       }
     );
