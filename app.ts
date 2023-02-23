@@ -161,6 +161,7 @@ app.post("/signup", [
         username: req.body.username,
         password: hashedPassword,
         saved: [],
+        liked: [],
       });
 
       user.save((err, result) => {
@@ -224,6 +225,7 @@ app.get("/user", (req: Request, res: Response, next: NextFunction) => {
         _id: req.user._id,
         username: req.user.username,
         saved: req.user.saved,
+        liked: req.user.liked,
       })
     : res.json({ errors: [{ message: "Unauthorized" }] });
 });
@@ -263,6 +265,31 @@ app.post(
       User.findByIdAndUpdate(
         req.params.userId,
         { $pull: { saved: req.body.articleId } },
+        (err: any, result: any) => {
+          if (err) return next(err);
+          else return res.json({ result: 0 });
+        }
+      );
+    }
+  }
+);
+
+app.post(
+  "/users/:userId/liked",
+  (req: Request, res: Response, next: NextFunction) => {
+    if (Number(req.body.toStatus) === 1) {
+      User.findByIdAndUpdate(
+        req.params.userId,
+        { $addToSet: { liked: req.body.articleId } },
+        (err: any, result: any) => {
+          if (err) return next(err);
+          else return res.json({ result: 1 });
+        }
+      );
+    } else {
+      User.findByIdAndUpdate(
+        req.params.userId,
+        { $pull: { liked: req.body.articleId } },
         (err: any, result: any) => {
           if (err) return next(err);
           else return res.json({ result: 0 });
