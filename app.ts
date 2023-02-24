@@ -61,6 +61,13 @@ app.post("/articles", [
     .withMessage("Author must be specified")
     .isLength({ max: 200 })
     .withMessage("Author must not exceed 200 characters"),
+  body("authorId")
+    .trim()
+    .escape()
+    .isLength({ min: 1 })
+    .withMessage("Unauthorized")
+    .isLength({ max: 200 })
+    .withMessage("Invalid credentials"),
   body("imageAlt")
     .trim()
     .escape()
@@ -102,6 +109,7 @@ app.post("/articles", [
       title: req.body.title,
       textBrief: textBrief,
       author: req.body.author,
+      authorId: new mongoose.Types.ObjectId(req.body.authorId),
       created: new Date(),
       image: req.body.image,
       imageAlt: req.body.imageAlt,

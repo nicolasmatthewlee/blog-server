@@ -1,9 +1,10 @@
-import { Model, model, Schema } from "mongoose";
+import { Model, model, Schema, Types } from "mongoose";
 
 interface articleI {
   title: string;
   textBrief: string;
   author: string;
+  authorId?: any;
   created: Date;
   image: Buffer;
   imageAlt: string;
@@ -14,6 +15,7 @@ const articleSchema = new Schema({
   title: { type: String, required: true },
   textBrief: { type: String, required: true },
   author: { type: String, required: true },
+  authorId: { type: Types.ObjectId, required: false },
   created: { type: Date, required: true },
   image: { type: Buffer, required: true },
   imageAlt: { type: String, required: true },
