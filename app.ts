@@ -39,12 +39,14 @@ app.use(cors({ credentials: true, origin: "http://127.0.0.1:3000" }));
 app.get("/articles", (req: Request, res: Response, next: NextFunction) => {
   Article.find(
     {},
-    { content: 0 },
-    (err: Error | null, articles: articleI[]) => {
+    { _id: 1 },
+    (err: Error | null, articles: { _id: string }[]) => {
       if (err) return res.json(err);
-      return res.json(articles);
+      return res.json(articles.map((a) => a._id));
     }
-  );
+  )
+    .sort({ _id: -1 }) // sort by created
+    .limit(10);
 });
 
 app.post("/articles", [
