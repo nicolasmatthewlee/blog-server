@@ -170,6 +170,7 @@ app.post("/signup", [
         password: hashedPassword,
         saved: [],
         liked: [],
+        notifications: [],
       });
 
       user.save((err, result) => {
@@ -234,6 +235,7 @@ app.get("/user", (req: Request, res: Response, next: NextFunction) => {
         username: req.user.username,
         saved: req.user.saved,
         liked: req.user.liked,
+        notifications: req.user.notifications,
       })
     : res.json({ errors: [{ message: "Unauthorized" }] });
 });
@@ -304,6 +306,27 @@ app.post(
         }
       );
     }
+  }
+);
+
+app.post(
+  "/users/:authorId/notifications",
+  (req: Request, res: Response, next: NextFunction) => {
+    const notification = {
+      user: req.body.userId,
+      event: req.body.event,
+      time: new Date(),
+      resource: req.body.resource,
+    };
+
+    User.findByIdAndUpdate(
+      req.params.authorId,
+      { $addToSet: { notifications: notification } },
+      (err: any, result: any) => {
+        if (err) return next(err);
+        else return res.json({ result: 0 });
+      }
+    );
   }
 );
 
