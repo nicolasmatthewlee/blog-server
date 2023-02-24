@@ -13,6 +13,7 @@ import MongoStore from "connect-mongo";
 const passport = require("passport");
 require("./passport.ts");
 const bcrypt = require("bcryptjs");
+import { Notification, notificationI } from "./models/notification";
 
 declare module "express" {
   export interface Request {
@@ -312,21 +313,42 @@ app.post(
 app.post(
   "/users/:authorId/notifications",
   (req: Request, res: Response, next: NextFunction) => {
-    const notification = {
+    const notification = new Notification({
       user: req.body.userId,
       event: req.body.event,
       time: new Date(),
       resource: req.body.resource,
-    };
+    });
 
-    User.findByIdAndUpdate(
-      req.params.authorId,
-      { $addToSet: { notifications: notification } },
-      (err: any, result: any) => {
+    notification.save((err, createdNotification) => {
+      if (err) return next(err);
+
+      User.findByIdAndUpdate(
+        req.params.authorId,
+        { $addToSet: { notifications: createdNotification._id } },
+        (err: any, result: any) => {
+          if (err) return next(err);
+          else return res.json({ success: true });
+        }
+      );
+    });
+  }
+);
+
+app.get(
+  "/users/:userId/notifications",
+  (req: Request, res: Response, next: NextFunction) => {
+    Notification.find({
+      _id: {
+        $in: req.user.notifications,
+      },
+    })
+      .populate("resource", "title")
+      .populate("user", "username")
+      .exec((err: any, notifications) => {
         if (err) return next(err);
-        else return res.json({ result: 0 });
-      }
-    );
+        return res.json(notifications);
+      });
   }
 );
 
