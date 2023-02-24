@@ -236,7 +236,6 @@ app.get("/user", (req: Request, res: Response, next: NextFunction) => {
         username: req.user.username,
         saved: req.user.saved,
         liked: req.user.liked,
-        notifications: req.user.notifications,
       })
     : res.json({ errors: [{ message: "Unauthorized" }] });
 });
