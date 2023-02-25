@@ -37,16 +37,28 @@ app.use(express.json({ limit: "50mb" }));
 app.use(cors({ credentials: true, origin: "http://127.0.0.1:3000" }));
 
 app.get("/articles", (req: Request, res: Response, next: NextFunction) => {
-  Article.find(
-    {},
-    { _id: 1 },
-    (err: Error | null, articles: { _id: string }[]) => {
-      if (err) return res.json(err);
-      return res.json(articles.map((a) => a._id));
-    }
-  )
-    .sort({ _id: -1 }) // sort by created
-    .limit(10);
+  if (req.query.before)
+    Article.find(
+      { _id: { $lt: req.query.before } },
+      { _id: 1 },
+      (err: Error | null, articles: { _id: string }[]) => {
+        if (err) return res.json(err);
+        return res.json(articles.map((a) => a._id));
+      }
+    )
+      .sort({ _id: -1 }) // sort by created
+      .limit(10);
+  else
+    Article.find(
+      {},
+      { _id: 1 },
+      (err: Error | null, articles: { _id: string }[]) => {
+        if (err) return res.json(err);
+        return res.json(articles.map((a) => a._id));
+      }
+    )
+      .sort({ _id: -1 }) // sort by created
+      .limit(10);
 });
 
 app.post("/articles", [
