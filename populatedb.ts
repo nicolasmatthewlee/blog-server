@@ -1,19 +1,19 @@
-import dotenv from "dotenv";
-dotenv.config();
+// import dotenv from "dotenv";
+// dotenv.config();
+// import { connect, connection } from "mongoose";
 import { readFileSync, createWriteStream } from "fs";
-import path from "path";
+import * as path from "path";
 import mongoose from "mongoose";
 mongoose.set("strictQuery", false);
-import { connect, connection } from "mongoose";
 import { Image, imageI } from "./models/image";
 import { Article } from "./models/article";
 
-connect(process.env.mongo ?? "").catch((err: Error) => {
-  throw err;
-});
-connection.on("error", (err: Error) => {
-  if (err) throw err;
-});
+// connect(process.env.mongo ?? "").catch((err: Error) => {
+//   throw err;
+// });
+// connection.on("error", (err: Error) => {
+//   if (err) throw err;
+// });
 
 const uploadSampleImage = () => {
   const image = new Image({
@@ -75,12 +75,16 @@ const uploadSampleArticle1 = () => {
       },
     ],
   });
-  article.save((err: Error | null) => {
-    if (err) return console.log(err);
-    console.log("Article 1 saved.");
-  });
+  return article
+    .save()
+    .then((res) => {
+      return res._id;
+    })
+    .catch((err) => {
+      return err;
+    });
 };
-uploadSampleArticle1();
+// uploadSampleArticle1();
 
 const uploadSampleArticle2 = () => {
   const article = new Article({
@@ -124,12 +128,16 @@ const uploadSampleArticle2 = () => {
       },
     ],
   });
-  article.save((err: Error | null) => {
-    if (err) return console.log(err);
-    console.log("Article 2 saved.");
-  });
+  return article
+    .save()
+    .then((res) => {
+      return res._id;
+    })
+    .catch((err) => {
+      return err;
+    });
 };
-uploadSampleArticle2();
+// uploadSampleArticle2();
 
 const uploadSampleArticle3 = () => {
   const article = new Article({
@@ -183,7 +191,7 @@ const uploadSampleArticle3 = () => {
     console.log("Article 3 saved.");
   });
 };
-uploadSampleArticle3();
+// uploadSampleArticle3();
 
 const uploadSampleArticle4 = () => {
   const article = new Article({
@@ -238,7 +246,7 @@ const uploadSampleArticle4 = () => {
     console.log("Article 4 saved.");
   });
 };
-uploadSampleArticle4();
+// uploadSampleArticle4();
 
 const uploadSampleArticle5 = () => {
   const article = new Article({
@@ -293,7 +301,7 @@ const uploadSampleArticle5 = () => {
     console.log("Article 5 saved.");
   });
 };
-uploadSampleArticle5();
+// uploadSampleArticle5();
 
 const uploadSampleArticle6 = () => {
   const article = new Article({
@@ -348,7 +356,7 @@ const uploadSampleArticle6 = () => {
     console.log("Article 6 saved.");
   });
 };
-uploadSampleArticle6();
+// uploadSampleArticle6();
 
 const uploadSampleArticle7 = () => {
   const article = new Article({
@@ -405,7 +413,7 @@ const uploadSampleArticle7 = () => {
     console.log("Article 7 saved.");
   });
 };
-uploadSampleArticle7();
+// uploadSampleArticle7();
 
 const uploadSampleArticle8 = () => {
   const article = new Article({
@@ -455,4 +463,15 @@ const uploadSampleArticle8 = () => {
     console.log("Article 8 saved.");
   });
 };
-uploadSampleArticle8();
+// uploadSampleArticle8();
+
+export {
+  uploadSampleArticle1,
+  uploadSampleArticle2,
+  uploadSampleArticle3,
+  uploadSampleArticle4,
+  uploadSampleArticle5,
+  uploadSampleArticle6,
+  uploadSampleArticle7,
+  uploadSampleArticle8,
+};
