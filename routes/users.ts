@@ -7,18 +7,16 @@ const passport = require("passport");
 const bcrypt = require("bcryptjs");
 const router = Router();
 
-router.get("/", [
+router.get("/current", [
   (req: Request, res: Response, next: NextFunction) => {
     if (req.user)
-      return req.user
-        ? res.json({
-            _id: req.user._id,
-            username: req.user.username,
-            saved: req.user.saved,
-            liked: req.user.liked,
-          })
-        : res.json({ errors: [{ message: "Unauthorized" }] });
-    else next();
+      return res.json({
+        _id: req.user._id,
+        username: req.user.username,
+        saved: req.user.saved,
+        liked: req.user.liked,
+      });
+    else return res.json({ errors: [{ message: "Unauthorized" }] });
   },
 ]);
 
@@ -59,6 +57,7 @@ router.post("/login", [
 ]);
 
 router.post("/logout", (req: Request, res: Response, next: NextFunction) => {
+  if (!req.user) return res.json({ errors: [{ message: "No user found" }] });
   if (req.logout)
     return req.logout((err: any) => {
       if (err) return next(err);
@@ -110,12 +109,25 @@ router.post("/", [
   },
 ]);
 
-router.delete("/:userId", (req: Request, res: Response, next: NextFunction) => {
-  User.findByIdAndDelete(req.params.userId, (err: any, result: any) => {
-    if (err) return next(err);
-    else return res.json({ success: true });
-  });
-});
+router.delete("/:userId", [
+  (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user || String(req.user._id) !== req.params.userId)
+      return res.json({ errors: [{ message: "Unauthorized" }] });
+    else next();
+  },
+  (req: Request, res: Response, next: NextFunction) => {
+    User.findByIdAndDelete(req.params.userId, (err: any, result: any) => {
+      if (err) {
+        if (err.name === "CastError")
+          return res.json({ errors: [{ message: "Invalid user id" }] });
+        else return next(err);
+      } else {
+        if (result) return res.json({ success: true });
+        else return res.json({ errors: [{ message: "No user found" }] });
+      }
+    });
+  },
+]);
 
 router.post(
   "/:userId/saved",

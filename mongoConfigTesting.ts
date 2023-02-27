@@ -15,7 +15,7 @@ const initializeMongoServer = async () => {
     console.log(`MongoDB successfully connected to ${mongoUri}`);
   });
 
-  return mongoose.connection;
+  return { connection: mongoose.connection, uri: mongoUri };
 };
 
 module.exports = initializeMongoServer;
